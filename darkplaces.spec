@@ -51,19 +51,6 @@ rm -rf %{buildroot}
 %{__install} -m 0755 darkplaces-dedicated \
 	%{buildroot}%{_gamesbindir}/darkplaces-dedicated
 
-cat > %{buildroot}%{_datadir}/applications/mandriva-%{name}.desktop << EOF
-[Desktop Entry]
-Name=DarkPlaces Quake
-Comment=%{Summary}
-Exec=%{_gamesbindir}/%{name}
-Icon=%{name}
-Terminal=false
-Type=Application
-StartupNotify=true
-Categories=Game;ArcadeGame;X-MandrivaLinux-MoreApplications-Games-Arcade;
-EOF
-
-
 %clean
 rm -rf %{buildroot}
 
