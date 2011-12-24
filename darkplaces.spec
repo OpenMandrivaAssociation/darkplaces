@@ -11,7 +11,7 @@ Source:		darkplaces-rev20091001.tar.bz2
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-build
 BuildRequires:	ImageMagick file lzma
 BuildRequires:	SDL-devel GL-devel unzip
-BuildRequires:	alsa-lib-devel
+BuildRequires:	alsa-lib-devel libxpm-devel
 Requires:	zlib libvorbis libjpeg curl
 Provides:	nexuiz-engine = 242
 
