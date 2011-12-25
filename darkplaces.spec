@@ -3,7 +3,7 @@
 Name:		darkplaces
 Summary:	Multiplayer, deathmatch oriented first person shooter engine
 Version:	rev20091001
-Release:	%mkrel 1
+Release:	%mkrel 1.1
 License: 	GPLv2+
 Group:		Games/Arcade
 URL:		http://icculus.org/twilight/darkplaces/
@@ -12,7 +12,7 @@ BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-build
 BuildRequires:	ImageMagick file lzma
 BuildRequires:	SDL-devel GL-devel unzip
 BuildRequires:	alsa-lib-devel libxpm-devel
-Requires:	zlib libvorbis libjpeg curl
+Requires:	zlib libvorbis libjpeg62 curl
 Provides:	nexuiz-engine = 242
 
 %description
