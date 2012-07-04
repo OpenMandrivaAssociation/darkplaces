@@ -11,7 +11,7 @@ Source:		darkplaces-%{version}.tar.bz2
 Patch0:         %{name}-makefile.patch
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-build
 BuildRequires:	imagemagick file lzma
-BuildRequires:	SDL-devel GL-devel unzip
+BuildRequires:	SDL-devel GL-devel unzip libjpeg62-devel
 BuildRequires:	libalsa-devel libxpm-devel libz-devel zlib-devel libvorbis-devel
 Requires:	zlib libvorbis libjpeg62 curl 
 Provides:	nexuiz-engine = 242
