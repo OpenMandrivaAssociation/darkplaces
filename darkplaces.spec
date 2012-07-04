@@ -2,12 +2,13 @@
 
 Name:		darkplaces
 Summary:	Multiplayer, deathmatch oriented first person shooter engine
-Version:	rev20091001
+Version:	rev20110628
 Release:	%mkrel 1.1
 License: 	GPLv2+
 Group:		Games/Arcade
 URL:		http://icculus.org/twilight/darkplaces/
-Source:		darkplaces-rev20091001.tar.bz2
+Source:		darkplaces-%{version}.tar.bz2
+Patch0:         %{name}-makefile.patch
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-build
 BuildRequires:	ImageMagick file lzma
 BuildRequires:	SDL-devel GL-devel unzip
@@ -34,6 +35,7 @@ This is the darkplaces dedicated server required to host network games.
 
 %prep
 %setup -q
+%patch0 -p1
 
 %build
 %{__make} release OPTIM_RELEASE="$RPM_OPT_FLAGS"
