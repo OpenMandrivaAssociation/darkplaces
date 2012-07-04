@@ -13,13 +13,11 @@ BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-build
 BuildRequires:	imagemagick file lzma
 BuildRequires:	SDL-devel GL-devel unzip
 BuildRequires:	alsa-lib-devel libxpm-devel
-Requires:	zlib libvorbis libjpeg62 curl zlib1-devel
+Requires:	zlib libvorbis libjpeg62 curl zlib-devel vorbis-devel
 Provides:	nexuiz-engine = 242
 
 %description
 Darkplaces is a modern, powerful first-person shooter engine.
-
-This package is non-free as it requires non-free data to run. You must have a version of Quake 1 to play.
 
 %package server
 Group: Games/Arcade
