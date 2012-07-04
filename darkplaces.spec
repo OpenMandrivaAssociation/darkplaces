@@ -10,7 +10,7 @@ URL:		http://icculus.org/twilight/darkplaces/
 Source:		darkplaces-%{version}.tar.bz2
 Patch0:         %{name}-makefile.patch
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-build
-BuildRequires:	ImageMagick file lzma
+BuildRequires:	imagemagick file lzma
 BuildRequires:	SDL-devel GL-devel unzip
 BuildRequires:	alsa-lib-devel libxpm-devel
 Requires:	zlib libvorbis libjpeg62 curl zlib1-devel
