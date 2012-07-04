@@ -13,7 +13,7 @@ BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-build
 BuildRequires:	ImageMagick file lzma
 BuildRequires:	SDL-devel GL-devel unzip
 BuildRequires:	alsa-lib-devel libxpm-devel
-Requires:	zlib libvorbis libjpeg62 curl
+Requires:	zlib libvorbis libjpeg62 curl zlib1-devel
 Provides:	nexuiz-engine = 242
 
 %description
