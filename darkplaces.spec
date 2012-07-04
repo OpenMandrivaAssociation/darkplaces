@@ -12,8 +12,8 @@ Patch0:         %{name}-makefile.patch
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-build
 BuildRequires:	imagemagick file lzma
 BuildRequires:	SDL-devel GL-devel unzip
-BuildRequires:	alsa-lib-devel libxpm-devel libz-devel
-Requires:	zlib libvorbis libjpeg62 curl zlib-devel vorbis-devel
+BuildRequires:	alsa-lib-devel libxpm-devel libz-devel zlib-devel vorbis-devel
+Requires:	zlib libvorbis libjpeg62 curl 
 Provides:	nexuiz-engine = 242
 
 %description
