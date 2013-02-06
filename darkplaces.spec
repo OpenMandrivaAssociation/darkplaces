@@ -1,5 +1,7 @@
 %define Werror_cflags %nil
 
+%define debug_package %{nil}
+
 Name:		darkplaces
 Summary:	Multiplayer, deathmatch oriented first person shooter engine
 Version:	rev20110628
