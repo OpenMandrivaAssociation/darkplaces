@@ -10,7 +10,7 @@ URL:		http://icculus.org/twilight/darkplaces/
 Source:		darkplaces-%{version}.tar.bz2
 Patch0:         %{name}-makefile.patch
 BuildRequires:	imagemagick file lzma
-BuildRequires:	SDL-devel GL-devel unzip libjpeg-devel libxxf86dga-devel
+BuildRequires:	SDL-devel GL-devel unzip jpeg-devel libxxf86dga-devel
 BuildRequires:	libalsa-devel libxpm-devel zlib-devel libvorbis-devel
 Requires:	zlib libvorbis curl 
 Provides:	nexuiz-engine = 242
