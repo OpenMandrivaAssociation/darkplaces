@@ -3,17 +3,16 @@
 Name:		darkplaces
 Summary:	Multiplayer, deathmatch oriented first person shooter engine
 Version:	rev20110628
-Release:	%mkrel 1.1
+Release:	2
 License: 	GPLv2+
 Group:		Games/Arcade
 URL:		http://icculus.org/twilight/darkplaces/
 Source:		darkplaces-%{version}.tar.bz2
 Patch0:         %{name}-makefile.patch
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-build
 BuildRequires:	imagemagick file lzma
 BuildRequires:	SDL-devel GL-devel unzip libjpeg-devel libxxf86dga-devel
 BuildRequires:	libalsa-devel libxpm-devel zlib-devel libvorbis-devel
-Requires:	zlib libvorbis libjpeg62 curl 
+Requires:	zlib libvorbis curl 
 Provides:	nexuiz-engine = 242
 
 %description
@@ -39,9 +38,6 @@ This is the darkplaces dedicated server required to host network games.
 %{__make} release OPTIM_RELEASE="$RPM_OPT_FLAGS"
 
 %install
-rm -rf %{buildroot}
-
-
 # Install the main programs
 %{__mkdir_p} %{buildroot}%{_gamesbindir}
 %{__install} -m 0755 darkplaces-glx \
@@ -50,9 +46,6 @@ rm -rf %{buildroot}
 	%{buildroot}%{_gamesbindir}/darkplaces-sdl
 %{__install} -m 0755 darkplaces-dedicated \
 	%{buildroot}%{_gamesbindir}/darkplaces-dedicated
-
-%clean
-rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
