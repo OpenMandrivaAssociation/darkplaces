@@ -1,0 +1,116 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Thu, 7 Jul 2011 18:11:42 +0100
+Subject: Be more type-safe when calling setjmp();
+ call the same one that libpng would
+
+Depending whether _BSD_SOURCE is preferred, glibc will provide one of two
+implementations of setjmp()/longjmp() (it either does or doesn't save the
+signal mask), acting on different definitions of the jmp_buf struct.
+
+libpng calls longjmp() internally, and expects its callers to call the
+version of setjmp() corresponding to the longjmp() call that libpng would
+make.
+
+In an attempt to ensure that consistent versions of setjmp() and longjmp()
+are used, pngconf.h insists that on Linux, setjmp.h has not already been
+included. However, quakedef.h includes that header, leading to some
+interesting contortions when using the system libpng.
+
+(IMO the right thing for libpng to do would be for it to provide an exported
+function png_setjmp (or something) which calls the version of setjmp() that
+libpng expects on the jmp_buf included in the png structure, like qpng_setjmp
+in this patch.)
+
+When using the system libpng headers, this patch also avoids the assumption
+that jmp_buf is the first thing in the png structure.
+---
+ image_png.c | 48 +++++++++++++++++++++++-------------------------
+ 1 file changed, 23 insertions(+), 25 deletions(-)
+
+diff --git a/image_png.c b/image_png.c
+index 289b8d3..dc3554d 100644
+--- a/image_png.c
++++ b/image_png.c
+@@ -30,6 +30,12 @@
+ // This has to come before anything else that includes setjmp.h, because
+ // libpng specifically wants non-BSD setjmp semantics.
+ # include <png.h>
++// Use the matching version of setjmp ourselves.
++static inline int
++my_setjmp (jmp_buf env)
++{
++	return setjmp (env);
++}
+ #endif
+ 
+ #include "quakedef.h"
+@@ -38,6 +44,8 @@
+ 
+ #ifdef LINK_TO_PNG
+ 
++#define qpng_setjmp(png) my_setjmp (png->jmpbuf)
++
+ #define qpng_set_sig_bytes png_set_sig_bytes
+ #define qpng_sig_cmp png_sig_cmp
+ #define qpng_create_read_struct png_create_read_struct
+@@ -108,17 +116,19 @@ static void				(*qpng_write_info)			(void*, void*);
+ static void				(*qpng_write_row)			(void*, unsigned char*);
+ static void				(*qpng_write_end)			(void*, void*);
+ 
+-// libpng 1.4+ longjmp hack
+-typedef void (*qpng_longjmp_ptr) (jmp_buf, int);
+-static jmp_buf* (*qpng_set_longjmp_fn) (void *, qpng_longjmp_ptr, size_t);
+-#define qpng_jmpbuf_14(png_ptr) (*qpng_set_longjmp_fn((png_ptr), longjmp, sizeof (jmp_buf)))
+-
+-// libpng 1.2 longjmp hack
+-#define qpng_jmpbuf_12(png_ptr) (*((jmp_buf *) png_ptr))
+-
+-// all version support
+-#define qpng_jmpbuf(png_ptr) \
+-	(qpng_set_longjmp_fn ? qpng_jmpbuf_14(png_ptr) : qpng_jmpbuf_12(png_ptr))
++	// NOTE: this relies on jmp_buf being the first thing in the png structure
++	// created by libpng! (this is correct for libpng 1.2.x)
++#ifdef __cplusplus
++#ifdef WIN64
++#define qpng_setjmp(png) setjmp((_JBTYPE *)png)
++#elif defined(MACOSX) || defined(WIN32)
++#define qpng_setjmp(png) setjmp((int *)png)
++#else
++#define qpng_setjmp(png) setjmp((__jmp_buf_tag *)png)
++#endif
++#else
++#define qpng_setjmp(png) setjmp(png)
++#endif
+ 
+ static dllfunction_t pngfuncs[] =
+ {
+@@ -366,7 +376,7 @@ unsigned char *PNG_LoadImage_BGRA (const unsigned char *raw, int filesize, int *
+ 
+ 	// NOTE: this relies on jmp_buf being the first thing in the png structure
+ 	// created by libpng! (this is correct for libpng 1.2.x)
+-	if (setjmp(qpng_jmpbuf(png)))
++	if (qpng_setjmp(png))
+ 	{
+ 		if (my_png.Data)
+ 			Mem_Free(my_png.Data);
+@@ -554,19 +564,7 @@ qboolean PNG_SaveImage_preflipped (const char *filename, int width, int height,
+ 	// on the fields in this struct for cleanup
+ 	memset(&my_png, 0, sizeof(my_png));
+ 
+-	// NOTE: this relies on jmp_buf being the first thing in the png structure
+-	// created by libpng! (this is correct for libpng 1.2.x)
+-#ifdef __cplusplus
+-#ifdef WIN64
+-	if (setjmp((_JBTYPE *)png))
+-#elif defined(MACOSX) || defined(WIN32)
+-	if (setjmp((int *)png))
+-#else
+-	if (setjmp((__jmp_buf_tag *)png))
+-#endif
+-#else
+-	if (setjmp(png))
+-#endif
++	if (qpng_setjmp(png))
+ 	{
+ 		qpng_destroy_write_struct(&png, &pnginfo);
+ 		return false;

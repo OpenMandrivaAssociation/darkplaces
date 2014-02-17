@@ -1,0 +1,50 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Tue, 5 Jul 2011 22:09:07 +0100
+Subject: Add support for "make LINK_TO_ZLIB=1"
+
+In Debian we want library dependencies to work in the conventional way,
+since many tools expect that and use it to generate package
+dependencies.
+
+Origin: vendor, Debian
+---
+ makefile     | 5 +++++
+ makefile.inc | 2 ++
+ 2 files changed, 7 insertions(+)
+
+diff --git a/makefile b/makefile
+index 2b22804..1510b72 100644
+--- a/makefile
++++ b/makefile
+@@ -307,6 +307,11 @@ CFLAGS_LIBJPEG=-DLINK_TO_LIBJPEG
+ LIB_JPEG=-ljpeg
+ endif
+ 
++ifdef LINK_TO_ZLIB
++CFLAGS_ZLIB=-DLINK_TO_ZLIB
++LIB_ZLIB=-lz
++endif
++
+ CFLAGS_PRELOAD=
+ ifneq ($(DP_MAKE_TARGET), mingw)
+ ifdef DP_PRELOAD_DEPENDENCIES
+diff --git a/makefile.inc b/makefile.inc
+index bb721e0..bd018bb 100644
+--- a/makefile.inc
++++ b/makefile.inc
+@@ -193,6 +193,7 @@ CFLAGS_COMMON=\
+ 	$(CFLAGS_FS) \
+ 	$(CFLAGS_WARNINGS) \
+ 	$(CFLAGS_LIBJPEG) \
++	$(CFLAGS_ZLIB) \
+ 	$(CFLAGS_D3D) \
+ 	-D_FILE_OFFSET_BITS=64 \
+ 	-D__KERNEL_STRICT_NAMES
+@@ -230,6 +231,7 @@ LDFLAGS_UNIXCOMMON=\
+ 	-lm \
+ 	$(LIB_ODE) \
+ 	$(LIB_JPEG) \
++	$(LIB_ZLIB) \
+ 	$(LIB_CRYPTO) \
+ 	$(LIB_GMP) \
+ 	$(LIB_CRYPTO_RIJNDAEL)

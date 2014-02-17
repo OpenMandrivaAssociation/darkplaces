@@ -2,100 +2,112 @@
 
 %define debug_package %{nil}
 
-Name:		darkplaces
 Summary:	Multiplayer, deathmatch oriented first person shooter engine
-Version:	rev20110628
-Release:	2
-License: 	GPLv2+
+Name:		darkplaces
+Version:	20130304
+Release:	1
+Epoch:		1
+License:	GPLv2+
 Group:		Games/Arcade
-URL:		http://icculus.org/twilight/darkplaces/
-Source:		darkplaces-%{version}.tar.bz2
-Patch0:         %{name}-makefile.patch
-BuildRequires:	imagemagick file lzma
-BuildRequires:	SDL-devel GL-devel unzip jpeg-devel libxxf86dga-devel
-BuildRequires:	libalsa-devel libxpm-devel zlib-devel libvorbis-devel
-Requires:	zlib libvorbis curl 
-Provides:	nexuiz-engine = 242
+Url:		http://icculus.org/twilight/darkplaces/
+Source0:	%{name}enginesource%{version}.zip
+# Debian patchset
+Patch0:		0001-Split-Unix-CFLAGS-libs-to-one-per-line.patch
+Patch1:		0002-Add-support-for-make-LINK_TO_LIBJPEG-1.patch
+Patch2:		0003-Add-support-for-make-LINK_TO_ZLIB-1.patch
+Patch3:		0004-Add-support-for-LINK_TO_LIBVORBIS-using-pkg-config.patch
+Patch4:		0005-Add-LINK_TO_MODPLUG-option.patch
+Patch5:		0006-add-LINK_TO_ODE-to-link-against-system-libode.patch
+Patch6:		0007-add-LINK_TO_THEORA.patch
+Patch7:		0008-Add-LINK_TO_PNG.patch
+Patch8:		0009-add-LINK_TO_CURL.patch
+Patch9:		0010-Add-LINK_TO_FREETYPE2.patch
+Patch10:	0011-Add-support-for-linking-to-system-d0_blind_id-and-d0.patch
+Patch11:	0012-Add-support-for-forcing-d0_blind_id-and-d0_rijndael-.patch
+Patch12:	0014-image_png.h-change-name-of-multiple-inclusion-guard-.patch
+Patch13:	0015-Be-more-type-safe-when-calling-setjmp-call-the-same-.patch
+Patch14:	0016-Be-a-bit-more-type-safe-about-using-libpng.patch
+Patch15:	0017-Fix-various-typos-dont-don-t-doesnt-doesn-t-arguemen.patch
+Patch16:	0018-Don-t-build-SSE-only-software-rasterizer-on-non-x86-.patch
+Patch17:	0019-If-linking-libpng-conventionally-use-the-png_jmpbuf-.patch
+Patch18:	0020-If-linking-libpng-normally-use-its-header-to-get-the.patch
+Patch19:	0021-If-linking-libpng-in-the-normal-way-use-its-actual-v.patch
+Patch20:	0022-Add-support-for-disabling-libavw.patch
+Patch21:	0023-Disable-dlopen-support-and-warn-if-it-gets-compiled-.patch
+Patch22:	0024-Disable-gpu-skinning-for-skeletal-models.patch
+BuildRequires:	jpeg-devel
+BuildRequires:	pkgconfig(alsa)
+BuildRequires:	pkgconfig(freetype2)
+BuildRequires:	pkgconfig(gl)
+BuildRequires:	pkgconfig(libcurl)
+BuildRequires:	pkgconfig(libmodplug)
+BuildRequires:	pkgconfig(libpng)
+BuildRequires:	pkgconfig(ode)
+BuildRequires:	pkgconfig(ogg)
+BuildRequires:	pkgconfig(sdl)
+BuildRequires:	pkgconfig(theora)
+BuildRequires:	pkgconfig(vorbis)
+BuildRequires:	pkgconfig(x11)
+BuildRequires:	pkgconfig(xext)
+BuildRequires:	pkgconfig(xpm)
+BuildRequires:	pkgconfig(xxf86dga)
+BuildRequires:	pkgconfig(zlib)
+Requires:	curl
 
 %description
 Darkplaces is a modern, powerful first-person shooter engine.
 
+%files
+%doc COPYING darkplaces.txt
+%{_gamesbindir}/darkplaces-glx
+%{_gamesbindir}/darkplaces-sdl
+
+#----------------------------------------------------------------------------
+
 %package server
-Group: Games/Arcade
-Summary: Dedicated server for the darkplaces engine
-Requires: 	zlib curl
-Provides: 	nexuiz-engine = 242
+Summary:	Dedicated server for the darkplaces engine
+Group:		Games/Arcade
+Requires:	curl
 
 %description server
 Darkplaces is a modern, powerful first-person shooter engine.
 
 This is the darkplaces dedicated server required to host network games.
 
-
-%prep
-%setup -q
-%patch0 -p1
-
-%build
-%{__make} release OPTIM_RELEASE="$RPM_OPT_FLAGS"
-
-%install
-# Install the main programs
-%{__mkdir_p} %{buildroot}%{_gamesbindir}
-%{__install} -m 0755 darkplaces-glx \
-	%{buildroot}%{_gamesbindir}/darkplaces-glx
-%{__install} -m 0755 darkplaces-sdl \
-	%{buildroot}%{_gamesbindir}/darkplaces-sdl
-%{__install} -m 0755 darkplaces-dedicated \
-	%{buildroot}%{_gamesbindir}/darkplaces-dedicated
-
-%files
-%defattr(-,root,root,-)
-%doc COPYING darkplaces.txt
-%{_gamesbindir}/darkplaces-glx
-%{_gamesbindir}/darkplaces-sdl
-
 %files server
-%defattr(-,root,root,-)
 %doc COPYING darkplaces.txt
 %{_gamesbindir}/darkplaces-dedicated
 
+#----------------------------------------------------------------------------
 
+%prep
+%setup -q -n %{name}
+%apply_patches
 
-%changelog
-* Wed Jul 04 2012 Zombie Ryushu <ryushu@mandriva.org> rev20110628-1.1
-+ Revision: 808054
-- zlib-devel one more time
-- libxxf86dga-devel
-- libjpeg62-devel
-- libjpeg62-devel
-- libalsa was wrong
-- libvorbis-devel
-- zlib-devel was in requires
-- vorbis-devel
-- vorbis-devel
-- zlib
-- Upgrade to 4.21 to fix OpenAL and zlib
-- Upgrade to rev20110628 for joypad support
+%build
+make \
+	release \
+	OPTIM_RELEASE="%{optflags}" \
+	LINK_TO_CURL=1 \
+	LINK_TO_FREETYPE2=1 \
+	LINK_TO_LIBJPEG=1 \
+	LINK_TO_LIBVORBIS=1 \
+	LINK_TO_MODPLUG=1 \
+	LINK_TO_ODE=1 \
+	LINK_TO_PNG=1 \
+	LINK_TO_THEORA=1 \
+	LINK_TO_ZLIB=1 \
+	DISABLE_OFFSCREEN_GECKO=1 \
+	DISABLE_D0_BLIND_ID=1 \
+	DISABLE_D0_RIJNDAEL=1
 
-* Sun Dec 25 2011 Zombie Ryushu <ryushu@mandriva.org> rev20091001-1.1
-+ Revision: 745129
-- libjpeg62
+%install
+# Install the main programs
+mkdir -p %{buildroot}%{_gamesbindir}
+install -m 0755 darkplaces-glx \
+	%{buildroot}%{_gamesbindir}/darkplaces-glx
+install -m 0755 darkplaces-sdl \
+	%{buildroot}%{_gamesbindir}/darkplaces-sdl
+install -m 0755 darkplaces-dedicated \
+	%{buildroot}%{_gamesbindir}/darkplaces-dedicated
 
-* Sat Dec 24 2011 Zombie Ryushu <ryushu@mandriva.org> rev20091001-1
-+ Revision: 745104
-- shortcut
-- fix libxpm
-- imported package darkplaces
-
-
-* Sat Feb 14 2009 muhammedu@gmail.com
-- Initial package based on a previous build
-- NOTE: I am the only one you should ask about
--	THIS package! Do not email the others
--	mentioned below!
-- Only build darkplaces without nexuiz
-* Fri Feb 13 2009 nesnomis@gmail.com
-- rebuild for opensuse 11.1
-* Wed May 21 2008 claes.backstrom@fsfe.org
-- Initial package

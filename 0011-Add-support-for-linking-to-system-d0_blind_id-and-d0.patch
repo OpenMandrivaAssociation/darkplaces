@@ -1,0 +1,82 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Wed, 6 Jul 2011 18:03:34 +0100
+Subject: Add support for linking to system d0_blind_id and d0_rijndael
+
+In Debian we want library dependencies to work in the conventional way,
+since many tools expect that and use it to generate package
+dependencies.
+
+(These libraries aren't currently in Debian, but if they were, we'd want
+to link them like this.)
+
+Origin: vendor, Debian
+---
+ crypto.c     |  4 ++--
+ makefile     | 10 ++++++++++
+ makefile.inc | 10 +++++-----
+ 3 files changed, 17 insertions(+), 7 deletions(-)
+
+diff --git a/crypto.c b/crypto.c
+index cf7cc5f..30f8554 100644
+--- a/crypto.c
++++ b/crypto.c
+@@ -102,7 +102,7 @@ static size_t Crypto_UnParsePack(char *buf, size_t len, unsigned long header, co
+ 
+ #define USE_AES
+ 
+-#ifdef CRYPTO_STATIC
++#if defined(CRYPTO_STATIC) || defined(LINK_TO_D0_BLIND_ID)
+ 
+ #include <d0_blind_id/d0_blind_id.h>
+ 
+@@ -285,7 +285,7 @@ static void Crypto_CloseLibrary (void)
+ 
+ #endif
+ 
+-#ifdef CRYPTO_RIJNDAEL_STATIC
++#if defined(CRYPTO_RIJNDAEL_STATIC) || defined(LINK_TO_D0_RIJNDAEL)
+ 
+ #include <d0_blind_id/d0_rijndael.h>
+ 
+diff --git a/makefile b/makefile
+index 967c487..7a4d33b 100644
+--- a/makefile
++++ b/makefile
+@@ -307,6 +307,16 @@ CFLAGS_CURL=-DLINK_TO_CURL `pkg-config --cflags libcurl`
+ LIB_CURL=`pkg-config --libs libcurl`
+ endif
+ 
++ifdef LINK_TO_D0_BLIND_ID
++CFLAGS_CRYPTO=-DLINK_TO_D0_BLIND_ID `pkg-config --cflags d0_blind_id`
++LIB_CRYPTO=`pkg-config --libs d0_blind_id`
++endif
++
++ifdef LINK_TO_D0_RIJNDAEL
++CFLAGS_CRYPTO_RIJNDAEL=-DLINK_TO_D0_RIJNDAEL `pkg-config --cflags d0_rijndael`
++LIB_CRYPTO_RIJNDAEL=`pkg-config --libs d0_rijndael`
++endif
++
+ ifdef LINK_TO_FREETYPE2
+ CFLAGS_FREETYPE2=-DLINK_TO_FREETYPE2 `pkg-config --cflags freetype2`
+ LIB_FREETYPE2=`pkg-config --libs freetype2`
+diff --git a/makefile.inc b/makefile.inc
+index 7b8023f..cf611d7 100644
+--- a/makefile.inc
++++ b/makefile.inc
+@@ -48,11 +48,11 @@ STRIP?=strip
+ OBJ_SND_COMMON=snd_main.o snd_mem.o snd_mix.o snd_ogg.o snd_wav.o snd_modplug.o
+ 
+ # statically loading d0_blind_id
+-LIB_CRYPTO=`[ -n "$(DP_CRYPTO_STATIC_LIBDIR)" ] && echo \ $(DP_CRYPTO_STATIC_LIBDIR)/libd0_blind_id.a`
+-LIB_GMP=`[ -n "$(DP_CRYPTO_STATIC_LIBDIR)" ] && { [ -n "$(DP_GMP_STATIC_LIBDIR)" ] && echo \ $(DP_GMP_STATIC_LIBDIR)/libgmp.a || echo \ -lgmp; }`
+-CFLAGS_CRYPTO=`[ -n "$(DP_CRYPTO_STATIC_LIBDIR)" ] && echo \ -I$(DP_CRYPTO_STATIC_LIBDIR)/../include\ -DCRYPTO_STATIC`
+-LIB_CRYPTO_RIJNDAEL=`[ -n "$(DP_CRYPTO_RIJNDAEL_STATIC_LIBDIR)" ] && echo \ $(DP_CRYPTO_RIJNDAEL_STATIC_LIBDIR)/libd0_rijndael.a`
+-CFLAGS_CRYPTO_RIJNDAEL=`[ -n "$(DP_CRYPTO_RIJNDAEL_STATIC_LIBDIR)" ] && echo \ -I$(DP_CRYPTO_RIJNDAEL_STATIC_LIBDIR)/../include\ -DCRYPTO_RIJNDAEL_STATIC`
++LIB_CRYPTO?=`[ -n "$(DP_CRYPTO_STATIC_LIBDIR)" ] && echo \ $(DP_CRYPTO_STATIC_LIBDIR)/libd0_blind_id.a`
++LIB_GMP?=`[ -n "$(DP_CRYPTO_STATIC_LIBDIR)" ] && { [ -n "$(DP_GMP_STATIC_LIBDIR)" ] && echo \ $(DP_GMP_STATIC_LIBDIR)/libgmp.a || echo \ -lgmp; }`
++CFLAGS_CRYPTO?=`[ -n "$(DP_CRYPTO_STATIC_LIBDIR)" ] && echo \ -I$(DP_CRYPTO_STATIC_LIBDIR)/../include\ -DCRYPTO_STATIC`
++LIB_CRYPTO_RIJNDAEL?=`[ -n "$(DP_CRYPTO_RIJNDAEL_STATIC_LIBDIR)" ] && echo \ $(DP_CRYPTO_RIJNDAEL_STATIC_LIBDIR)/libd0_rijndael.a`
++CFLAGS_CRYPTO_RIJNDAEL?=`[ -n "$(DP_CRYPTO_RIJNDAEL_STATIC_LIBDIR)" ] && echo \ -I$(DP_CRYPTO_RIJNDAEL_STATIC_LIBDIR)/../include\ -DCRYPTO_RIJNDAEL_STATIC`
+ 
+ # Additional stuff for libmodplug
+ LIB_SND_MODPLUG?=`[ -n "$(DP_MODPLUG_STATIC_LIBDIR)" ] && echo \ $(DP_MODPLUG_STATIC_LIBDIR)/libmodplug.a\ -lstdc++`

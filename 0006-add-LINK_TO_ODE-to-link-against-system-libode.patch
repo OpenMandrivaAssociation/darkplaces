@@ -1,0 +1,100 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Wed, 6 Jul 2011 09:33:19 +0100
+Subject: add LINK_TO_ODE to link against system libode
+
+In Debian we want library dependencies to work in the conventional way,
+since many tools expect that and use it to generate package
+dependencies.
+
+Origin: vendor, Debian
+---
+ makefile     |  5 +++++
+ makefile.inc |  4 ++--
+ world.c      | 15 ++++++++++++++-
+ world.h      |  9 ---------
+ 4 files changed, 21 insertions(+), 12 deletions(-)
+
+diff --git a/makefile b/makefile
+index e24aa48..e7c7cf5 100644
+--- a/makefile
++++ b/makefile
+@@ -317,6 +317,11 @@ CFLAGS_SND_MODPLUG=-DLINK_TO_MODPLUG `pkg-config --cflags libmodplug`
+ LIB_SND_MODPLUG=`pkg-config --libs libmodplug`
+ endif
+ 
++ifdef LINK_TO_ODE
++CFLAGS_ODE=-DLINK_TO_ODE `pkg-config --cflags ode`
++LIB_ODE=`pkg-config --libs ode`
++endif
++
+ ifdef LINK_TO_ZLIB
+ CFLAGS_ZLIB=-DLINK_TO_ZLIB
+ LIB_ZLIB=-lz
+diff --git a/makefile.inc b/makefile.inc
+index 35ae3c4..84ff115 100644
+--- a/makefile.inc
++++ b/makefile.inc
+@@ -26,8 +26,8 @@ CPUOPTIMIZATIONS?=-fno-math-errno -ffinite-math-only -fno-rounding-math -fno-sig
+ # NOTE: *never* *ever* use the -ffast-math or -funsafe-math-optimizations flag
+ 
+ # Additional stuff for libode
+-LIB_ODE=`[ -n "$(DP_ODE_STATIC_LIBDIR)" ] && "$(DP_ODE_STATIC_LIBDIR)/../bin/ode-config" --libs` `[ -n "$(DP_ODE_STATIC_LIBDIR)" ] && echo -lstdc++`
+-CFLAGS_ODE=`[ -n "$(DP_ODE_STATIC_LIBDIR)" ] && "$(DP_ODE_STATIC_LIBDIR)/../bin/ode-config" --cflags || { [ -n "$(DP_ODE_DYNAMIC)" ] && echo \ -DODE_DYNAMIC; }` `[ -n "$(DP_ODE_STATIC_LIBDIR)" ] && echo -DODE_STATIC`
++LIB_ODE?=`[ -n "$(DP_ODE_STATIC_LIBDIR)" ] && "$(DP_ODE_STATIC_LIBDIR)/../bin/ode-config" --libs` `[ -n "$(DP_ODE_STATIC_LIBDIR)" ] && echo -lstdc++`
++CFLAGS_ODE?=`[ -n "$(DP_ODE_STATIC_LIBDIR)" ] && "$(DP_ODE_STATIC_LIBDIR)/../bin/ode-config" --cflags || { [ -n "$(DP_ODE_DYNAMIC)" ] && echo \ -DODE_DYNAMIC; }` `[ -n "$(DP_ODE_STATIC_LIBDIR)" ] && echo -DODE_STATIC`
+ 
+ 
+ SDL_CONFIG?=sdl-config
+diff --git a/world.c b/world.c
+index abacf51..1f96eae 100644
+--- a/world.c
++++ b/world.c
+@@ -330,6 +330,19 @@ void World_LinkEdict(world_t *world, prvm_edict_t *ent, const vec3_t mins, const
+ // physics engine support
+ //============================================================================
+ 
++// backwards compat
++#ifdef ODE_STATIC
++# define LINK_TO_ODE 1
++#endif
++
++#ifndef LINK_TO_ODE
++# define ODE_DYNAMIC 1
++#endif
++
++#if defined(LINK_TO_ODE) || defined(ODE_DYNAMIC)
++#define USEODE 1
++#endif
++
+ #ifdef USEODE
+ cvar_t physics_ode_quadtree_depth = {0, "physics_ode_quadtree_depth","5", "desired subdivision level of quadtree culling space"};
+ cvar_t physics_ode_allowconvex = {0, "physics_ode_allowconvex", "0", "allow usage of Convex Hull primitive type on trimeshes that have custom 'collisionconvex' mesh. If disabled, trimesh primitive type are used."};
+@@ -365,7 +378,7 @@ cvar_t physics_ode = {0, "physics_ode", "0", "run ODE physics (VERY experimental
+ // LordHavoc: this large chunk of definitions comes from the ODE library
+ // include files.
+ 
+-#ifdef ODE_STATIC
++#ifdef LINK_TO_ODE
+ #include "ode/ode.h"
+ #else
+ #ifdef WINAPI
+diff --git a/world.h b/world.h
+index 18e9b00..e43ebd1 100644
+--- a/world.h
++++ b/world.h
+@@ -119,15 +119,6 @@ int World_EntitiesInBox(world_t *world, const vec3_t mins, const vec3_t maxs, in
+ void World_Start(world_t *world);
+ void World_End(world_t *world);
+ 
+-// physics macros
+-#ifndef ODE_STATIC
+-# define ODE_DYNAMIC 1
+-#endif
+-
+-#if defined(ODE_STATIC) || defined(ODE_DYNAMIC)
+-# define USEODE 1
+-#endif
+-
+ // update physics
+ // this is called by SV_Physics
+ void World_Physics_Frame(world_t *world, double frametime, double gravity);

@@ -1,0 +1,52 @@
+diff -urN darkplaces/image_png.c darkplaces-patched/image_png.c
+--- darkplaces/image_png.c	2014-02-17 19:39:52.755762799 +1100
++++ darkplaces-patched/image_png.c	2014-02-17 19:43:54.415386038 +1100
+@@ -267,6 +267,8 @@
+ =================================================================
+ */
+ 
++#ifndef LINK_TO_PNG
++
+ #define PNG_LIBPNG_VER_STRING_12 "1.2.4"
+ #define PNG_LIBPNG_VER_STRING_14 "1.4.0"
+ #define PNG_LIBPNG_VER_STRING_15 "1.5.0"
+@@ -286,6 +288,8 @@
+ 
+ #define PNG_INFO_tRNS 0x0010
+ 
++#endif
++
+ // this struct is only used for status information during loading
+ static struct
+ {
+@@ -375,10 +379,15 @@
+ 	// png_sig_cmp is not fully const-correct
+ 	if(qpng_sig_cmp((unsigned char *) raw, 0, filesize))
+ 		return NULL;
++
+ 	png = (void *)qpng_create_read_struct(
++#ifdef LINK_TO_PNG
++		PNG_LIBPNG_VER_STRING,
++#else
+ 		(qpng_access_version_number() / 100 == 102) ? PNG_LIBPNG_VER_STRING_12 :
+ 		(qpng_access_version_number() / 100 == 104) ? PNG_LIBPNG_VER_STRING_14 :
+-		PNG_LIBPNG_VER_STRING_15, // nasty hack... whatever
++		PNG_LIBPNG_VER_STRING_15, // nasty hack to support both libpng12 and libpng14
++#endif
+ 		0, PNG_error_fn, PNG_warning_fn
+ 	);
+ 	if(!png)
+@@ -566,9 +575,13 @@
+ #endif
+ 
+ 	png = qpng_create_write_struct( 
++#ifdef LINK_TO_PNG
++		PNG_LIBPNG_VER_STRING,
++#else
+ 		(qpng_access_version_number() / 100 == 102) ? PNG_LIBPNG_VER_STRING_12 :
+ 		(qpng_access_version_number() / 100 == 104) ? PNG_LIBPNG_VER_STRING_14 :
+ 		PNG_LIBPNG_VER_STRING_15, // nasty hack... whatever
++#endif
+ 		0, PNG_error_fn, PNG_warning_fn
+ 	);
+ 	if(!png)

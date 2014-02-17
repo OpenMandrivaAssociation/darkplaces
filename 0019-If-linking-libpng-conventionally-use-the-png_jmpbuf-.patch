@@ -1,0 +1,24 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Sat, 21 Jan 2012 22:19:29 +0000
+Subject: If linking libpng conventionally, use the png_jmpbuf macro
+
+This is necessary to compile against libpng 1.5.x.
+
+Origin: vendor, Debian
+---
+ image_png.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/image_png.c b/image_png.c
+index a3afb3c..5c9d057 100644
+--- a/image_png.c
++++ b/image_png.c
+@@ -44,7 +44,7 @@ my_setjmp (jmp_buf env)
+ 
+ #ifdef LINK_TO_PNG
+ 
+-#define qpng_setjmp(png) my_setjmp (png->jmpbuf)
++#define qpng_setjmp(png) my_setjmp (png_jmpbuf (png))
+ 
+ #define qpng_set_sig_bytes png_set_sig_bytes
+ #define qpng_sig_cmp png_sig_cmp

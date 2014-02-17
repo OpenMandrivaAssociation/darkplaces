@@ -1,0 +1,58 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Tue, 5 Jul 2011 22:16:28 +0100
+Subject: Add support for LINK_TO_LIBVORBIS (using pkg-config)
+
+In Debian we want library dependencies to work in the conventional way,
+since many tools expect that and use it to generate package
+dependencies.
+
+Origin: vendor, Debian
+---
+ makefile     | 5 +++++
+ makefile.inc | 3 +++
+ 2 files changed, 8 insertions(+)
+
+diff --git a/makefile b/makefile
+index 1510b72..9afb12e 100644
+--- a/makefile
++++ b/makefile
+@@ -307,6 +307,11 @@ CFLAGS_LIBJPEG=-DLINK_TO_LIBJPEG
+ LIB_JPEG=-ljpeg
+ endif
+ 
++ifdef LINK_TO_LIBVORBIS
++CFLAGS_LIBVORBIS=-DLINK_TO_LIBVORBIS `pkg-config --cflags vorbisfile`
++LIB_LIBVORBIS=`pkg-config --libs vorbisfile`
++endif
++
+ ifdef LINK_TO_ZLIB
+ CFLAGS_ZLIB=-DLINK_TO_ZLIB
+ LIB_ZLIB=-lz
+diff --git a/makefile.inc b/makefile.inc
+index bd018bb..78448f7 100644
+--- a/makefile.inc
++++ b/makefile.inc
+@@ -193,6 +193,7 @@ CFLAGS_COMMON=\
+ 	$(CFLAGS_FS) \
+ 	$(CFLAGS_WARNINGS) \
+ 	$(CFLAGS_LIBJPEG) \
++	$(CFLAGS_LIBVORBIS) \
+ 	$(CFLAGS_ZLIB) \
+ 	$(CFLAGS_D3D) \
+ 	-D_FILE_OFFSET_BITS=64 \
+@@ -236,6 +237,7 @@ LDFLAGS_UNIXCOMMON=\
+ 	$(LIB_GMP) \
+ 	$(LIB_CRYPTO_RIJNDAEL)
+ LDFLAGS_UNIXCL=\
++	$(LIB_LIBVORBIS) \
+ 	-L$(UNIX_X11LIBPATH) \
+ 	-lX11 \
+ 	-lXpm \
+@@ -274,6 +276,7 @@ CFLAGS_UNIX_PRELOAD=-DPREFER_PRELOAD
+ 
+ LDFLAGS_UNIXSDL=\
+ 	$(SDLCONFIG_LIBS) \
++	$(LIB_LIBVORBIS) \
+ 	$(LIB_SND_MODPLUG)
+ 
+ EXE_UNIXCL=darkplaces-glx

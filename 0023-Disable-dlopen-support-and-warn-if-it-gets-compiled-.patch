@@ -1,0 +1,38 @@
+From: Simon McVittie <smcv@debian.org>
+Date: Sat, 18 May 2013 00:42:19 +0100
+Subject: Disable dlopen support, and warn if it gets compiled in
+
+Forwarded: no, Debian-specific
+---
+ sys.h        | 2 +-
+ sys_shared.c | 4 +++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/sys.h b/sys.h
+index 862bdf7..7da82e3 100644
+--- a/sys.h
++++ b/sys.h
+@@ -50,7 +50,7 @@ dllfunction_t;
+  * \param handle
+  * \param fcts
+  */
+-qboolean Sys_LoadLibrary (const char** dllnames, dllhandle_t* handle, const dllfunction_t *fcts);
++qboolean Sys_LoadLibrary (const char** dllnames, dllhandle_t* handle, const dllfunction_t *fcts) __attribute__ ((__warning__ ("in Debian, please link shared libraries at build time")));
+ void Sys_UnloadLibrary (dllhandle_t* handle);
+ void* Sys_GetProcAddress (dllhandle_t handle, const char* name);
+ 
+diff --git a/sys_shared.c b/sys_shared.c
+index 10f5a60..b55b29c 100644
+--- a/sys_shared.c
++++ b/sys_shared.c
+@@ -6,7 +6,9 @@
+ 
+ #include "quakedef.h"
+ 
+-#define SUPPORTDLL
++/* Debian-specific: no dynamic loading please, it breaks versioned dependency
++ * tracking */
++#undef SUPPORTDLL
+ 
+ #ifdef WIN32
+ # include <windows.h>
