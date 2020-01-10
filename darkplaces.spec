@@ -82,7 +82,7 @@ This is the darkplaces dedicated server required to host network games.
 
 %prep
 %setup -q -n %{name}
-%apply_patches
+%autopatch -p1
 
 %build
 make \
