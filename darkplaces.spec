@@ -9,7 +9,7 @@ Release:	2
 Epoch:		1
 License:	GPLv2+
 Group:		Games/Arcade
-Url:		http://icculus.org/twilight/darkplaces/
+Url:		https://icculus.org/twilight/darkplaces/
 Source0:	%{name}enginesource%{version}.zip
 # Debian patchset
 Patch0:		0001-Split-Unix-CFLAGS-libs-to-one-per-line.patch
