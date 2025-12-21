@@ -35,6 +35,7 @@ Patch19:	0021-If-linking-libpng-in-the-normal-way-use-its-actual-v.patch
 Patch20:	0022-Add-support-for-disabling-libavw.patch
 Patch21:	0023-Disable-dlopen-support-and-warn-if-it-gets-compiled-.patch
 Patch22:	0024-Disable-gpu-skinning-for-skeletal-models.patch
+BuildRequires:	make
 BuildRequires:	jpeg-devel
 BuildRequires:	pkgconfig(alsa)
 BuildRequires:	pkgconfig(freetype2)
